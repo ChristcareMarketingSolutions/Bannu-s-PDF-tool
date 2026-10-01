@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!--
+    Content Security Policy: scripts, workers, fonts and network requests are
+    restricted to this site only. `connect-src 'self' blob: data:` means the
+    page technically cannot send your files to any other server.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Bannu&rsquo;s PDF Tool</title>
+  <meta name="description" content="Free, private PDF tools that run entirely in your browser: merge, split, extract, delete, reorder, rotate, compress, watermark, number, protect and convert PDFs. No uploads.">
+  <meta name="theme-color" content="#f4effc">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Bannu's PDF Tool">
+  <meta property="og:description" content="Merge, split, compress, convert and protect PDFs in your browser.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/theme-init.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Decorative background orbs -->
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <span class="orb orb-4"></span>
+  </div>
+
+  <div class="page">
+    <div class="topbar">
+      <button type="button" id="theme-toggle" class="btn btn-ghost btn-icon theme-toggle" aria-label="Switch to dark mode"></button>
+    </div>
+
+    <header class="hero">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="48" height="48" focusable="false">
+            <defs>
+              <linearGradient id="brand-g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#8f72dc"/>
+                <stop offset="1" stop-color="#e297bd"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#brand-g)"/>
+            <path d="M18 12h9l7 7v14a3 3 0 0 1-3 3H18a3 3 0 0 1-3-3V15a3 3 0 0 1 3-3z" fill="#fff" fill-opacity=".96"/>
+            <path d="M27 12v5a2 2 0 0 0 2 2h5" fill="none" stroke="#c9b6f2" stroke-width="1.6"/>
+            <path d="M19.5 25h9M19.5 29.5h6" stroke="#8f72dc" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <h1 class="brand-name">Bannu&rsquo;s PDF Tool</h1>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="tools-panel glass" aria-labelledby="tools-heading">
+        <h2 id="tools-heading" class="sr-only">PDF tools</h2>
+
+        <div id="pending-banner" class="pending-banner" hidden>
+          <span data-icon="file" data-size="18"></span>
+          <p><strong id="pending-name"></strong> is ready — choose a tool below.</p>
+          <button type="button" id="pending-cancel" class="btn btn-ghost btn-sm">Cancel</button>
+        </div>
+
+        <div class="tools-toolbar">
+          <div class="search">
+            <span class="search-icon" data-icon="search" data-size="18"></span>
+            <label for="tool-search" class="sr-only">Search PDF tools</label>
+            <input id="tool-search" type="search" class="search-input" placeholder="Search PDF tools..." autocomplete="off" spellcheck="false" aria-describedby="search-count">
+            <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          </div>
+          <div id="category-filter" class="category-filter" role="group" aria-label="Filter tools by category"></div>
+        </div>
+        <p id="search-count" class="sr-only" aria-live="polite"></p>
+
+        <ul id="tool-grid" class="tool-grid" aria-label="Available tools"></ul>
+        <p id="no-results" class="no-results" hidden>No PDF tools found.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-rule" aria-hidden="true"></div>
+      <p class="footer-brand">Bannu&rsquo;s PDF Tool</p>
+      <p class="footer-credit">Created by <strong>Subhash Vundavalli</strong></p>
+      <p class="footer-connect">Connect with me on LinkedIn</p>
+      <a class="btn btn-soft linkedin-link" href="https://www.linkedin.com/in/subhashvundavalli" target="_blank" rel="noopener noreferrer" aria-label="Subhash Vundavalli on LinkedIn (opens in a new tab)">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        <span>LinkedIn</span>
+      </a>
+      <p class="footer-copy">© <span id="year">2026</span> Bannu&rsquo;s PDF Tool</p>
+    </footer>
+  </div>
+
+  <!-- Tool workspace (modal) -->
+  <dialog id="workspace" class="workspace" aria-labelledby="ws-title">
+    <div class="ws-inner">
+      <header class="ws-header">
+        <button type="button" id="ws-back" class="btn btn-ghost ws-back">
+          <span data-icon="arrowLeft" data-size="18"></span><span>Back</span>
+        </button>
+        <div class="ws-heading">
+          <span id="ws-icon" class="ws-icon" aria-hidden="true"></span>
+          <h2 id="ws-title">Tool</h2>
+        </div>
+        <span class="ws-local" title="Processed on your device"><span data-icon="shield" data-size="14"></span><span class="ws-local-text">Local only</span></span>
+      </header>
+      <div id="ws-body" class="ws-body ws-scroll"></div>
+    </div>
+  </dialog>
+
+  <div class="drop-overlay" aria-hidden="true">
+    <div class="drop-overlay-card">
+      <span data-icon="upload" data-size="40"></span>
+      <p>Drop your files here</p>
+    </div>
+  </div>
+
+  <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <noscript>
+    <div class="noscript">Bannu&rsquo;s PDF Tool needs JavaScript to process PDFs in your browser. Please enable JavaScript.</div>
+  </noscript>
+
+  <script src="js/app.bundle.js" defer></script>
+</body>
+</html>
