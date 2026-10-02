@@ -61,8 +61,6 @@ function renderToolGrid() {
       h('button', {
         type: 'button',
         class: 'tool-select',
-        'aria-label': tool.name,
-        'aria-describedby': descId,
         onClick: () => openTool(tool.id),
         onMouseenter: () => preload(tool.libs),
         onFocus: () => preload(tool.libs),
