@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://christcaremarketingsolutions.github.io/Bannu-s-PDF-tool/sitemap.xml
