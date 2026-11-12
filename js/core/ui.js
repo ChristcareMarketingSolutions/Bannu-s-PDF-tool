@@ -240,9 +240,10 @@ export function downloadBlob(blob, filename, registry) {
 export function resultPanel({ files, zip, message, stats = [], preview, actions = [], registry, note }) {
   const multiple = files.length > 1;
   const isImage = files.every((f) => /^image\//.test(f.blob.type));
-  const noun = isImage ? 'image' : 'PDF';
+  const isText = files.every((f) => /^text\//.test(f.blob.type));
+  const noun = isImage ? 'image' : isText ? 'text file' : 'PDF';
   const heading = h('h3', { class: 'result-title', tabindex: '-1' }, 'Done!');
-  const mainLabel = multiple ? 'Download ZIP' : `Download ${isImage ? 'image' : 'PDF'}`;
+  const mainLabel = multiple ? 'Download ZIP' : `Download ${noun}`;
   const status = h('p', { class: 'result-status', role: 'status' });
 
   const mainBtn = button(mainLabel, {

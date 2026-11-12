@@ -81,6 +81,14 @@ export const TOOLS = [
     load: () => import('./images-to-pdf.js'),
   },
   {
+    id: 'ocr', category: 'convert', name: 'OCR PDF', icon: 'scan', accepts: 'pdf',
+    description: 'Make scanned PDFs searchable and copy their text.',
+    longDescription: 'Recognise text on scanned pages. Get a searchable PDF (the pages look exactly the same, but you can search, select and copy the text) or a plain-text file.',
+    keywords: 'ocr scan scanned searchable text recognition recognize extract copy tesseract image to text',
+    libs: ['pdfjs', 'pdflib'],
+    load: () => import('./ocr.js'),
+  },
+  {
     id: 'compress', category: 'optimize', name: 'Compress PDF', icon: 'compress', accepts: 'pdf',
     description: 'Reduce PDF file size while maintaining reasonable quality.',
     longDescription: 'Make your PDF smaller. Choose a lossless clean-up, image optimisation, or maximum compression.',

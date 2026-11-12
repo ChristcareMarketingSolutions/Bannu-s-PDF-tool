@@ -113,6 +113,33 @@ export function pdfjsDocumentOptions() {
   };
 }
 
+/**
+ * Tesseract.js (OCR). The engine (~4 MB WebAssembly) and the language data
+ * (~3 MB per language) are served from lib/tesseract and only downloaded the
+ * first time someone runs OCR; the browser caches them afterwards.
+ *
+ * The worker is loaded from its real URL (not a blob: URL), so it is allowed
+ * by the page's Content-Security-Policy. Browsers block workers on pages
+ * opened directly from disk, so OCR needs the site to be served over http(s).
+ */
+export function loadTesseract() {
+  if (isFileProtocol) {
+    return Promise.reject(new AppError('OCR needs the website version of this tool (for example on GitHub Pages, or run "python3 -m http.server" in the folder). Browsers block the OCR engine on pages opened directly from disk.', 'lib'));
+  }
+  return loadClassicScript(libUrl('tesseract/tesseract.min.js'), 'Tesseract');
+}
+
+/** Paths Tesseract.js needs to run fully from this site. */
+export function tesseractPaths() {
+  return {
+    workerPath: libUrl('tesseract/worker.min.js'),
+    corePath: libUrl('tesseract/core'),
+    langPath: libUrl('tesseract/lang'),
+    workerBlobURL: false,
+    gzip: true,
+  };
+}
+
 /** Warm up libraries in the background (called when a tool opens). */
 export function preload(names = []) {
   const map = { pdflib: loadPdfLib, pdfjs: loadPdfjs, jszip: loadJSZip };

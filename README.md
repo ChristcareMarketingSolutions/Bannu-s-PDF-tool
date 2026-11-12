@@ -2,7 +2,7 @@
 
 Professional PDF tools that run entirely in your browser.
 
-Bannu's PDF Tool is a static web application for everyday PDF work: merge, split, extract, delete, reorder, rotate, convert, compress, watermark, number, protect and unlock PDFs. Every operation happens **on your own device** using JavaScript. There is no server, no account and no upload.
+Bannu's PDF Tool is a static web application for everyday PDF work: merge, split, extract, delete, reorder, rotate, convert, OCR, compress, watermark, number, protect and unlock PDFs. Every operation happens **on your own device** using JavaScript. There is no server, no account and no upload.
 
 Created by **Subhash Vundavalli** · [LinkedIn](https://www.linkedin.com/in/subhashvundavalli)
 
@@ -20,6 +20,7 @@ Created by **Subhash Vundavalli** · [LinkedIn](https://www.linkedin.com/in/subh
 | **Rotate PDF** | Rotate single pages, selected pages or all pages by 90°/180°. Lossless (uses the PDF `/Rotate` attribute). |
 | **PDF to Images** | Convert all or selected pages to PNG or JPG at 72–300 DPI. |
 | **Images to PDF** | JPG, PNG, WebP, GIF, BMP → one PDF. Page size (fit / A4 / Letter / Legal / A3), orientation and margins. Phone photos are automatically kept upright (EXIF orientation). |
+| **OCR PDF** | Recognises text on scanned pages (Tesseract.js, runs on your device). Output a **searchable PDF** — the original pages are untouched and an invisible text layer is added so you can search, select and copy — and/or a plain **.txt** file. Fast / Accurate / Small-print modes (200–400 DPI), skips pages that already contain text, handles rotated pages. |
 | **Compress PDF** | Three levels: lossless clean-up, image optimisation (keeps text sharp), or maximum compression (rasterise). |
 | **Watermark PDF** | Text watermark with font, colour, size, opacity, angle, centred or tiled layout, and page selection. |
 | **Page Numbers** | Six positions, five formats (`1`, `Page 1`, `Page 1 of 10`, `1 / 10`, `- 1 -`), start number, size, margin, colour, skip cover page, page ranges. |
@@ -43,6 +44,8 @@ Created by **Subhash Vundavalli** · [LinkedIn](https://www.linkedin.com/in/subh
 | [pdf-lib](https://pdf-lib.js.org/) — via the [`@cantoo/pdf-lib`](https://github.com/cantoo-scribe/pdf-lib) fork | 2.x | Merging, splitting, page edits, rotation, watermarks, page numbers, creating PDFs, AES-256 encryption & decryption | MIT |
 | [PDF.js](https://mozilla.github.io/pdf.js/) (`pdfjs-dist`, legacy build) | 4.10 | Rendering thumbnails, previews and images | Apache-2.0 |
 | [JSZip](https://stuk.github.io/jszip/) | 3.10 | Creating ZIP downloads in the browser | MIT |
+| [Tesseract.js](https://github.com/naptha/tesseract.js) + tesseract.js-core | 7.0 | OCR (text recognition) in a Web Worker via WebAssembly | Apache-2.0 |
+| Tesseract `eng` language data (`4.0.0_best_int`) | 4.0 | English recognition model | Apache-2.0 |
 | [Inter](https://rsms.me/inter/) (self-hosted) | 4 | Typography | SIL OFL 1.1 |
 
 No frameworks: plain HTML, CSS and JavaScript modules. The modules in `js/` are combined into one file, `js/app.bundle.js`, so the site also works when `index.html` is opened directly from disk. The bundle is already built — you only rebuild it if you edit the JavaScript (see *Adding a new tool*). All libraries are **bundled in `lib/`** — the site makes no requests to any CDN or third-party server.
@@ -120,12 +123,13 @@ bannu-pdf-tools/
 │   │   ├── page-tool.js    Shared workflow for single-PDF tools
 │   │   ├── queue-tool.js   Shared workflow for multi-file tools
 │   │   ├── compress-engine.js
+│   │   ├── ocr.js          Tesseract.js OCR + invisible (searchable) text layer
 │   │   ├── image-utils.js  EXIF orientation, image decoding/re-encoding
 │   │   └── zip.js          ZIP packaging
 │   └── tools/
 │       ├── registry.js     ← list of all tools (add new tools here)
 │       ├── merge.js  split.js  extract.js  delete.js  reorder.js  rotate.js
-│       ├── pdf-to-images.js  images-to-pdf.js  compress.js
+│       ├── pdf-to-images.js  images-to-pdf.js  ocr.js  compress.js
 │       └── watermark.js  page-numbers.js  protect.js  unlock.js
 ├── assets/
 │   ├── icons/favicon.svg
@@ -133,7 +137,8 @@ bannu-pdf-tools/
 └── lib/                    Third-party libraries (bundled, with licences)
     ├── pdf-lib/pdf-lib.min.js
     ├── pdfjs/pdf.min.js, pdf.worker.min.js, standard_fonts/, cmaps.zip (classic-script builds of PDF.js)
-    └── jszip/jszip.min.js
+    ├── jszip/jszip.min.js
+    └── tesseract/          tesseract.min.js, worker.min.js, core/ (WebAssembly builds), lang/eng.traineddata.gz
 ```
 
 ---
@@ -144,6 +149,7 @@ bannu-pdf-tools/
 
 When opened from disk, browsers apply a few restrictions, so the app automatically adapts:
 
+- **OCR PDF is not available** — browsers block its WebAssembly worker on `file://`. Serve the folder (below) or use the GitHub Pages site.
 - PDF parsing runs on the main thread instead of a background worker (very large PDFs feel a bit slower).
 - PDFs whose fonts are *not embedded* may preview with substitute fonts, and some CJK (Chinese/Japanese/Korean) text may not preview. Your output files are not affected.
 
@@ -216,7 +222,6 @@ Then enable Pages as in step 6 above.
 - WebAssembly compression engine (qpdf / Ghostscript / MuPDF) for stronger, text-preserving compression.
 - Unicode font embedding (via `@pdf-lib/fontkit`) for watermarks and page numbers in any language.
 - Preserving bookmarks/outlines when merging and splitting.
-- OCR (e.g. Tesseract.js) to make scanned PDFs searchable.
 - Sign PDF, fill forms, crop pages, PDF → text, HTML → PDF.
 - Offline support with a service worker (installable PWA).
 - Moving heavy pdf-lib work to a Web Worker for even smoother UI on very large files.
