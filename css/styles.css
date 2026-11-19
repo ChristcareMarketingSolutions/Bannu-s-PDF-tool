@@ -590,6 +590,9 @@ body.is-file-dragging:not(.has-modal) .drop-overlay { opacity: 1; visibility: vi
 
 /* ---------- Form controls ---------- */
 .options { display: grid; gap: 16px; }
+.options-group { display: grid; gap: 10px; min-width: 0; margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.options-group > .options { gap: 12px; }
+.options-group .btn { justify-self: start; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-label { font-size: 0.85rem; font-weight: 620; color: var(--text); padding: 0; }
@@ -864,6 +867,12 @@ body.is-file-dragging:not(.has-modal) .drop-overlay { opacity: 1; visibility: vi
   transition: all var(--t-fast) var(--ease);
 }
 .thumb.is-selected .thumb-check { background: var(--primary); border-color: var(--primary); color: var(--on-primary); transform: scale(1.05); }
+.thumb-badge {
+  position: absolute; top: 8px; right: 8px; z-index: 2; display: none;
+  padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  background: #9a6311; color: #fff; box-shadow: var(--shadow-sm);
+}
+.thumb.is-selected .thumb-badge { display: block; }
 .thumb-removed {
   position: absolute; inset: 0;
   display: none; place-items: center; align-content: center; gap: 6px;

@@ -33,7 +33,9 @@ export class PdfViewer {
    * @param {object} o
    * @param {any} o.doc          PDF.js document proxy (ownership transferred to the viewer)
    * @param {number} o.numPages
-   * @param {{select?:boolean, rotate?:boolean, remove?:boolean, reorder?:boolean}} o.features
+   * @param {{select?:boolean, rotate?:boolean, remove?:boolean, reorder?:boolean, selectBadge?:string, selectNoun?:string}} o.features
+   *   `selectBadge` shows a text badge (e.g. "Blank") on selected pages instead of a tick;
+   *   `selectNoun` replaces the word "selected" in the status line and screen-reader labels.
    * @param {'all'|'none'} [o.initialSelection]
    * @param {HTMLElement[]} [o.toolbarExtras]  tool-specific buttons for the toolbar
    * @param {(viewer: PdfViewer) => void} [o.onChange]
@@ -136,7 +138,8 @@ export class PdfViewer {
     h('span', { class: 'thumb-frame' },
       h('span', { class: 'thumb-skeleton', 'aria-hidden': 'true' }),
       img,
-      f.select ? h('span', { class: 'thumb-check', 'aria-hidden': 'true' }, icon('check', { size: 14, strokeWidth: '3' })) : null,
+      f.select && !f.selectBadge ? h('span', { class: 'thumb-check', 'aria-hidden': 'true' }, icon('check', { size: 14, strokeWidth: '3' })) : null,
+      f.select && f.selectBadge ? h('span', { class: 'thumb-badge', 'aria-hidden': 'true' }, f.selectBadge) : null,
       f.remove ? h('span', { class: 'thumb-removed', 'aria-hidden': 'true' }, icon('trash', { size: 22 }), h('span', {}, 'Will be removed')) : null));
 
     const actions = [];
@@ -184,7 +187,7 @@ export class PdfViewer {
     li.style.setProperty('--rot-scale', String(this.rotationScale(cached, p.rotation)));
     if (this.features.select) {
       main.setAttribute('aria-pressed', String(!!p.selected));
-      main.setAttribute('aria-label', `${label}${p.selected ? ', selected' : ''}${p.rotation ? `, rotated ${p.rotation}°` : ''}`);
+      main.setAttribute('aria-label', `${label}${p.selected ? `, ${this.features.selectNoun || 'selected'}` : ''}${p.rotation ? `, rotated ${p.rotation}°` : ''}`);
     } else if (this.features.remove) {
       main.setAttribute('aria-pressed', String(!!p.removed));
       main.setAttribute('aria-label', `${label}${p.removed ? ', marked for removal' : ''}. Activate to ${p.removed ? 'keep' : 'remove'} this page.`);
@@ -484,7 +487,7 @@ export class PdfViewer {
   updateStatus() {
     const total = this.pages.length;
     const parts = [plural(total, 'page')];
-    if (this.features.select) parts.push(`${this.pages.filter((p) => p.selected).length} selected`);
+    if (this.features.select) parts.push(`${this.pages.filter((p) => p.selected).length} ${this.features.selectNoun || 'selected'}`);
     if (this.features.remove && !this.features.select) {
       const r = this.pages.filter((p) => p.removed).length;
       if (r) parts.push(`${r} to remove`);

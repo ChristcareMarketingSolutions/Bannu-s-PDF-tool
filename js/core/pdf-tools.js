@@ -174,7 +174,9 @@ export const NUMBER_FORMATS = {
 
 /**
  * @param {any} doc pdf-lib document (modified in place)
- * @param {{position:string, format:keyof NUMBER_FORMATS, startAt:number, fontSize:number, margin:number, color:string, font:string}} o
+ * @param {{position:string, format:keyof NUMBER_FORMATS, startAt:number, fontSize:number, margin:number, color:string, font:string, numbers?: (number|null)[], total?: number}} o
+ *   `numbers` (optional, same length as pageIndexes) gives each page its number, or null to
+ *   count the page without printing anything; `total` overrides the "of N" total.
  * @param {number[]} pageIndexes pages that receive a number (0-based, ascending)
  */
 export async function addPageNumbers(doc, o, pageIndexes, { onProgress, signal } = {}) {
@@ -184,14 +186,16 @@ export async function addPageNumbers(doc, o, pageIndexes, { onProgress, signal }
   const color = rgb(c.r, c.g, c.b);
   const fmt = NUMBER_FORMATS[o.format] || NUMBER_FORMATS.plain;
   const pages = doc.getPages();
-  const total = pageIndexes.length + o.startAt - 1;
+  const total = o.total ?? pageIndexes.length + o.startAt - 1;
   const [vertical, horizontal] = o.position.split('-'); // e.g. "bottom-center"
 
   for (let n = 0; n < pageIndexes.length; n++) {
     throwIfAborted(signal);
+    const number = o.numbers ? o.numbers[n] : n + o.startAt;
+    if (number == null) continue;
     const page = pages[pageIndexes[n]];
     const { W, H, rot, toPage } = visualGeometry(page);
-    const label = fmt(n + o.startAt, total);
+    const label = fmt(number, total);
     const w = measure(font, label, o.fontSize);
     const u = horizontal === 'left' ? o.margin : horizontal === 'right' ? W - o.margin - w : (W - w) / 2;
     const v = vertical === 'top' ? H - o.margin - o.fontSize * 0.75 : o.margin;
@@ -200,6 +204,26 @@ export async function addPageNumbers(doc, o, pageIndexes, { onProgress, signal }
     if (n % 25 === 0) { onProgress?.(n / pageIndexes.length); await yieldToUI(); }
   }
   stamp(doc);
+  return doc;
+}
+
+/**
+ * Print a centred notice (e.g. "This page is intentionally left blank") on pages.
+ * @param {any} doc pdf-lib document (modified in place)
+ * @param {number[]} pageIndexes 0-based
+ */
+export async function addCentredNotice(doc, text, pageIndexes, { fontSize = 12, color = '#3b3355' } = {}) {
+  const { StandardFonts, rgb, degrees } = await loadPdfLib();
+  const font = await doc.embedFont(StandardFonts.HelveticaOblique);
+  const c = hexToRgb01(color);
+  const pages = doc.getPages();
+  const w = measure(font, text, fontSize);
+  for (const i of pageIndexes) {
+    const page = pages[i];
+    const { W, H, rot, toPage } = visualGeometry(page);
+    const { x, y } = toPage((W - w) / 2, H / 2 - fontSize * 0.35);
+    page.drawText(text, { x, y, size: fontSize, font, color: rgb(c.r, c.g, c.b), rotate: degrees(rot) });
+  }
   return doc;
 }
 

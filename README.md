@@ -23,7 +23,7 @@ Created by **Subhash Vundavalli** · [LinkedIn](https://www.linkedin.com/in/subh
 | **OCR PDF** | Recognises text on scanned pages (Tesseract.js, runs on your device). Output a **searchable PDF** — the original pages are untouched and an invisible text layer is added so you can search, select and copy — and/or a plain **.txt** file. Fast / Accurate / Small-print modes (200–400 DPI), skips pages that already contain text, handles rotated pages. |
 | **Compress PDF** | Three levels: lossless clean-up, image optimisation (keeps text sharp), or maximum compression (rasterise). |
 | **Watermark PDF** | Text watermark with font, colour, size, opacity, angle, centred or tiled layout, and page selection. |
-| **Page Numbers** | Six positions, five formats (`1`, `Page 1`, `Page 1 of 10`, `1 / 10`, `- 1 -`), start number, size, margin, colour, skip cover page, page ranges. |
+| **Page Numbers** | Six positions, five formats (`1`, `Page 1`, `Page 1 of 10`, `1 / 10`, `- 1 -`), start number, size, margin, colour, skip cover page, page ranges. **Blank page detection** for digital and scanned PDFs (ignores scanner edges, punch holes, specks and show-through; signed or stamped pages are not treated as blank); blank pages are badged in the viewer and can be corrected by clicking. Blank pages can be numbered normally, numbered with *“This page is intentionally left blank”*, counted without a printed number, or skipped. |
 | **Protect PDF** | AES-256 password encryption with permission settings (printing, copying, editing, comments/forms) and optional owner password. |
 | **Unlock PDF** | Enter the password once and save an unlocked copy (also removes owner restrictions). |
 
@@ -123,6 +123,7 @@ bannu-pdf-tools/
 │   │   ├── page-tool.js    Shared workflow for single-PDF tools
 │   │   ├── queue-tool.js   Shared workflow for multi-file tools
 │   │   ├── compress-engine.js
+│   │   ├── blank-detect.js Blank page detection (digital text check + ink analysis for scans)
 │   │   ├── ocr.js          Tesseract.js OCR + invisible (searchable) text layer
 │   │   ├── image-utils.js  EXIF orientation, image decoding/re-encoding
 │   │   └── zip.js          ZIP packaging
