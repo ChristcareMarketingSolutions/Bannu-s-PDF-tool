@@ -20,8 +20,9 @@ const POSITIONS = [
 const BLANK_MODES = [
   { value: 'number', label: 'Number them like other pages' },
   { value: 'notice', label: 'Number them + "This page is intentionally left blank"' },
-  { value: 'hide', label: 'Count them, but print no number' },
-  { value: 'skip', label: 'Skip them (not numbered, not counted)' },
+  { value: 'hide', label: "Don't number them — but count them in the sequence" },
+  { value: 'skip', label: "Don't number them — and don't count them" },
+  { value: 'remove', label: 'Remove them from the PDF' },
 ];
 const BLANK_NOTICE = 'This page is intentionally left blank';
 const AUTO_DETECT_MAX_PAGES = 500;
@@ -61,6 +62,7 @@ export default function mount(ctx) {
       ], '28');
       const color = h('input', { type: 'color', class: 'color-input', value: '#3b3355', 'aria-label': 'Number colour' });
       const skipFirst = checkbox('Skip the first page (cover)', false);
+      const reverse = checkbox('Reverse numbering (count down: first page gets the highest number)', false);
       const pages = textInput({ placeholder: 'All pages (or e.g. 3-20)' });
 
       /* ---------------- Blank pages ---------------- */
@@ -140,6 +142,7 @@ export default function mount(ctx) {
           h('div', { class: 'field-row' }, field('Start at', start), field('Text size', size)),
           h('div', { class: 'field-row' }, field('Margin', margin), field('Colour', color)),
           skipFirst.el,
+          reverse.el,
           field('Pages to number', pages, 'Leave empty to number every page.'),
           blankSection),
         read() {
@@ -152,19 +155,27 @@ export default function mount(ctx) {
           if (!(fontSize >= 6 && fontSize <= 48)) throw new AppError('Text size must be between 6 and 48.', 'input');
 
           const blank = new Set(viewer.selectedSources());
+          const blankSorted = [...blank].sort((a, b) => a - b);
           const mode = blankMode.value;
-          const o = { position, format: format.value, startAt, fontSize, margin: Number(margin.value), color: color.value, font: 'Helvetica' };
-          if (mode === 'skip') {
-            targets = targets.filter((i) => !blank.has(i));
-          } else if (mode === 'hide') {
-            o.numbers = targets.map((i, n) => (blank.has(i) ? null : n + startAt));
+          if (mode === 'remove' && blank.size >= numPages) throw new AppError('Every page is marked as blank — at least one page must remain.', 'input');
+          if (mode === 'skip' || mode === 'remove') targets = targets.filter((i) => !blank.has(i));
+          if (!targets.length) throw new AppError('There are no pages to number with these settings.', 'input');
+
+          // Sequence numbers in reading order (null = counted but not printed), then optionally reversed.
+          let numbers = targets.map((i, n) => (mode === 'hide' && blank.has(i) ? null : n + startAt));
+          if (numbers.every((n) => n == null)) throw new AppError('There are no pages to number with these settings.', 'input');
+          if (reverse.input.checked) {
+            const total = targets.length + startAt - 1;
+            numbers = numbers.map((n, k) => (n == null ? null : total - k));
           }
-          if (!targets.length || (o.numbers && o.numbers.every((n) => n == null))) throw new AppError('There are no pages to number with these settings.', 'input');
-          const numbered = o.numbers ? o.numbers.filter((n) => n != null).length : targets.length;
+          const o = { position, format: format.value, startAt, fontSize, margin: Number(margin.value), color: color.value, font: 'Helvetica', numbers, total: targets.length + startAt - 1 };
           return {
-            targets, o, mode, numbered,
-            blank: [...blank].sort((a, b) => a - b),
-            notice: mode === 'notice' ? [...blank].sort((a, b) => a - b) : [],
+            targets, o, mode,
+            reversed: reverse.input.checked,
+            numbered: numbers.filter((n) => n != null).length,
+            blank: blankSorted,
+            notice: mode === 'notice' ? blankSorted : [],
+            remove: mode === 'remove' ? blankSorted : [],
           };
         },
         onViewerChange: syncListFromViewer,
@@ -179,6 +190,11 @@ export default function mount(ctx) {
         progress.set(0.88, 'Marking blank pages…');
         await addCentredNotice(doc, BLANK_NOTICE, options.notice, { color: options.o.color });
       }
+      if (options.remove.length) {
+        progress.set(0.9, 'Removing blank pages…');
+        // Highest index first so the remaining indexes stay valid.
+        [...options.remove].sort((a, b) => b - a).forEach((i) => doc.removePage(i));
+      }
       progress.set(0.93, 'Saving…');
       const blob = await saveToBlob(doc);
       progress.set(1, 'Done');
@@ -186,12 +202,13 @@ export default function mount(ctx) {
       const blankText = {
         number: 'numbered like other pages',
         notice: 'numbered and marked "intentionally left blank"',
-        hide: 'counted without a printed number',
-        skip: 'skipped',
+        hide: 'not numbered (but counted in the sequence)',
+        skip: 'not numbered and not counted',
+        remove: 'removed from the PDF',
       }[mode];
       return {
         files: [{ blob, name: outputName(file.name, 'numbered') }],
-        message: `Page numbers added to ${plural(options.numbered, 'page')}.`,
+        message: `Page numbers added to ${plural(options.numbered, 'page')}${options.reversed ? ' (counting down)' : ''}.${options.remove.length ? ` ${plural(doc.getPageCount(), 'page')} remain.` : ''}`,
         note: blank.length ? `${plural(blank.length, 'blank page')} (${formatPageList(blank)}) ${blankText}.` : 'No blank pages were marked.',
       };
     },
